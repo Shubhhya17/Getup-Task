@@ -18,8 +18,25 @@ export function timeAgo(date: string | Date) {
   return formatDistanceToNow(new Date(date), { addSuffix: true });
 }
 
-/** Status → CSS class (color + text — never color alone for accessibility) */
-export function getStatusClass(status: string) {
+/**
+ * Status → dot+label CSS class.
+ * Approach (b): dot (●) + text label, no icon library glyph.
+ * Returns a class that styles ::before as a colored circle.
+ */
+export function getStatusClass(status: string): string {
+  const map: Record<string, string> = {
+    'Open':        'status-dot status-open',
+    'In Progress': 'status-dot status-progress',
+    'Resolved':    'status-dot status-resolved',
+    'Closed':      'status-dot status-closed',
+  };
+  return map[status] ?? 'status-dot status-closed';
+}
+
+/**
+ * Status → compact badge class (used in table cells, not full dot+label).
+ */
+export function getStatusBadgeClass(status: string): string {
   const map: Record<string, string> = {
     'Open':        'badge-status-open',
     'In Progress': 'badge-status-progress',
@@ -29,8 +46,24 @@ export function getStatusClass(status: string) {
   return map[status] ?? 'badge-status-closed';
 }
 
-/** Priority → CSS class */
-export function getPriorityClass(priority: string) {
+/**
+ * Priority → square pip (■) + label CSS class.
+ * Square distinguishes priority from status (circle).
+ */
+export function getPriorityClass(priority: string): string {
+  const map: Record<string, string> = {
+    Low:      'priority-pip priority-low',
+    Medium:   'priority-pip priority-medium',
+    High:     'priority-pip priority-high',
+    Critical: 'priority-pip priority-critical',
+  };
+  return map[priority] ?? 'priority-pip priority-medium';
+}
+
+/**
+ * Priority → compact badge class (table cells).
+ */
+export function getPriorityBadgeClass(priority: string): string {
   const map: Record<string, string> = {
     Low:      'badge-low',
     Medium:   'badge-medium',
@@ -40,8 +73,8 @@ export function getPriorityClass(priority: string) {
   return map[priority] ?? 'badge-medium';
 }
 
-/** Priority → left-bar urgency indicator class (ticket rows) */
-export function getPriorityBarClass(priority: string) {
+/** Priority → left-bar class (ticket rows) */
+export function getPriorityBarClass(priority: string): string {
   const map: Record<string, string> = {
     Low:      'priority-bar-low',
     Medium:   'priority-bar-medium',
@@ -51,26 +84,26 @@ export function getPriorityBarClass(priority: string) {
   return map[priority] ?? 'priority-bar-medium';
 }
 
-/** Priority → solid hex color (for Recharts) */
-export function getPriorityColor(priority: string) {
+/** Priority → hex color (Recharts) */
+export function getPriorityColor(priority: string): string {
   const map: Record<string, string> = {
-    Low:      '#3FB950',
-    Medium:   '#E3B341',
-    High:     '#F0883E',
-    Critical: '#F85149',
+    Low:      '#16A34A',
+    Medium:   '#D97706',
+    High:     '#EA580C',
+    Critical: '#DC2626',
   };
-  return map[priority] ?? '#8B949E';
+  return map[priority] ?? '#9CA3AF';
 }
 
-/** Status → solid hex color (for Recharts) */
-export function getStatusColor(status: string) {
+/** Status → hex color (Recharts) */
+export function getStatusColor(status: string): string {
   const map: Record<string, string> = {
-    'Open':        '#3FB950',
-    'In Progress': '#E3B341',
-    'Resolved':    '#58A6FF',
-    'Closed':      '#484F58',
+    'Open':        '#16A34A',
+    'In Progress': '#D97706',
+    'Resolved':    '#2563EB',
+    'Closed':      '#9CA3AF',
   };
-  return map[status] ?? '#484F58';
+  return map[status] ?? '#9CA3AF';
 }
 
 /** Ticket status state machine */
@@ -99,12 +132,12 @@ export function getErrorMessage(error: unknown): string {
   return 'An error occurred';
 }
 
-/** Returns the role badge label and semantic class */
+/** Role → display label + color class */
 export function getRoleDisplay(role: string): { label: string; className: string } {
   const map: Record<string, { label: string; className: string }> = {
-    admin:    { label: 'Admin',    className: 'text-[hsl(var(--priority-high))]' },
-    agent:    { label: 'Agent',    className: 'text-[hsl(var(--status-resolved))]' },
-    customer: { label: 'Customer', className: 'text-muted-foreground' },
+    admin:    { label: 'Admin',    className: 'text-[#C2410C]' },
+    agent:    { label: 'Agent',    className: 'text-[#1D4ED8]' },
+    customer: { label: 'Customer', className: 'text-[#6B6B6B]' },
   };
-  return map[role] ?? { label: role, className: 'text-muted-foreground' };
+  return map[role] ?? { label: role, className: 'text-[#6B6B6B]' };
 }

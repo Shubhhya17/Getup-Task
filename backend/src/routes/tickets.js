@@ -12,6 +12,7 @@ const {
   addComment,
   getActivityLog,
   acceptAiSuggestion,
+  generateAgentReplyAssist,
 } = require('../controllers/ticketController');
 
 const router = express.Router();
@@ -332,6 +333,43 @@ router.post(
   ],
   validate,
   acceptAiSuggestion
+);
+
+/**
+ * @swagger
+ * /api/tickets/{id}/ai-reply:
+ *   post:
+ *     summary: Agent requests AI to generate a reply
+ *     tags: [Tickets]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: AI draft reply generated
+ */
+router.post(
+  '/:id/ai-reply',
+  authorize('agent', 'admin'),
+  [
+    body('tone')
+      .optional()
+      .isIn(['concise', 'empathetic', 'professional']),
+  ],
+  validate,
+  generateAgentReplyAssist
 );
 
 module.exports = router;

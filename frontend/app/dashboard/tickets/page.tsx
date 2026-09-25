@@ -5,47 +5,23 @@ import Link from 'next/link';
 import { ticketApi, Ticket } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn, getStatusClass, getPriorityClass, getPriorityBarClass, timeAgo } from '@/lib/utils';
+import { cn, getStatusClass, getPriorityClass, getPriorityBadgeClass, getStatusBadgeClass, getPriorityBarClass, timeAgo } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
-import {
-  Plus,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Inbox,
-  SlidersHorizontal,
-  X,
-  ArrowRight,
-} from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, SlidersHorizontal, X } from 'lucide-react';
 
-const STATUSES    = ['', 'Open', 'In Progress', 'Resolved', 'Closed'];
-const PRIORITIES  = ['', 'Low', 'Medium', 'High', 'Critical'];
-const CATEGORIES  = ['', 'General', 'Technical', 'Billing', 'Sales', 'Other'];
-
-/* Column header with sort indicator — structural, not decorative */
-function ColHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn('text-2xs font-medium text-muted-foreground uppercase tracking-wide', className)}>
-      {children}
-    </div>
-  );
-}
+const STATUSES   = ['', 'Open', 'In Progress', 'Resolved', 'Closed'];
+const PRIORITIES = ['', 'Low', 'Medium', 'High', 'Critical'];
+const CATEGORIES = ['', 'General', 'Technical', 'Billing', 'Sales', 'Other'];
 
 export default function TicketsPage() {
   const { user } = useAuth();
-  const [tickets, setTickets]       = useState<Ticket[]>([]);
-  const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 1 });
-  const [isLoading, setIsLoading]   = useState(true);
+  const [tickets, setTickets]         = useState<Ticket[]>([]);
+  const [pagination, setPagination]   = useState({ total: 0, page: 1, totalPages: 1 });
+  const [isLoading, setIsLoading]     = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
-    status:   '',
-    priority: '',
-    category: '',
-    search:   '',
-    page:     1,
-    limit:    20,
+    status: '', priority: '', category: '', search: '', page: 1, limit: 25,
   });
 
   const fetchTickets = useCallback(async () => {
@@ -57,19 +33,15 @@ export default function TicketsPage() {
       const res = await ticketApi.list(params as any);
       setTickets(res.data.data);
       setPagination(res.data.pagination);
-    } catch {
-      setTickets([]);
-    } finally {
-      setIsLoading(false);
-    }
+    } catch { setTickets([]); }
+    finally { setIsLoading(false); }
   }, [filters]);
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
   const updateFilter = (key: string, value: string | number) => {
     setFilters((prev) => ({
-      ...prev,
-      [key]: value,
+      ...prev, [key]: value,
       page: key !== 'page' ? 1 : (value as number),
     }));
   };
@@ -81,30 +53,28 @@ export default function TicketsPage() {
   const hasActiveFilters = filters.status || filters.priority || filters.category || filters.search;
 
   return (
-    <div className="pt-14 lg:pt-0">
-      {/* ── Page header ──────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-5 pt-2">
+    <div className="pt-12 lg:pt-0">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-6 pt-2">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Tickets</h1>
-          <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+          <h1>Tickets</h1>
+          <p className="text-xs text-[#6B6B6B] mt-0.5 font-mono">
             {pagination.total.toLocaleString()} total
           </p>
         </div>
         {(user?.role === 'customer' || user?.role === 'admin') && (
           <Link href="/dashboard/tickets/new">
-            <Button size="sm" id="new-ticket-btn">
-              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              New ticket
-            </Button>
+            <Button size="sm" id="new-ticket-btn">New ticket</Button>
           </Link>
         )}
       </div>
 
-      {/* ── Toolbar ──────────────────────────────────────────────── */}
+      {/* ── Toolbar ── */}
       <div className="flex gap-2 mb-3">
         <div className="relative flex-1">
           <Search
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A1A1A1]"
+            strokeWidth={1.5}
             aria-hidden="true"
           />
           <Input
@@ -118,10 +88,10 @@ export default function TicketsPage() {
           {filters.search && (
             <button
               onClick={() => updateFilter('search', '')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1A1] hover:text-[#1A1A1A]"
               aria-label="Clear search"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" strokeWidth={1.5} />
             </button>
           )}
         </div>
@@ -132,34 +102,30 @@ export default function TicketsPage() {
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
             'gap-1.5',
-            (showFilters || hasActiveFilters) && 'border-primary/50 text-primary bg-primary/5'
+            (showFilters || hasActiveFilters) && 'border-[#2563EB] text-[#2563EB] bg-[#EFF6FF]'
           )}
           aria-expanded={showFilters}
           aria-controls="filter-panel"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+          <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={1.5} aria-hidden="true" />
           Filters
           {hasActiveFilters && (
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-primary"
-              aria-label="Active filters"
-            />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" aria-label="Active filters" />
           )}
         </Button>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-muted-foreground">
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-[#6B6B6B]">
             Clear
           </Button>
         )}
       </div>
 
-      {/* ── Filter panel ──────────────────────────────────────────── */}
+      {/* ── Filter panel ── */}
       {showFilters && (
         <div
           id="filter-panel"
-          className="grid grid-cols-3 gap-2 mb-4 p-4 rounded-lg border border-border animate-slide-down"
-          style={{ background: 'hsl(var(--surface-2))' }}
+          className="grid grid-cols-3 gap-3 mb-4 p-4 rounded border border-[#E8E8E5] bg-[#FAFAF9] animate-slide-down"
           role="group"
           aria-label="Filter options"
         >
@@ -171,7 +137,7 @@ export default function TicketsPage() {
             <div key={key}>
               <label
                 htmlFor={`filter-${key}`}
-                className="block text-2xs font-medium text-muted-foreground mb-1.5"
+                className="block text-xs font-medium text-[#1A1A1A] mb-1.5"
               >
                 {label}
               </label>
@@ -179,49 +145,44 @@ export default function TicketsPage() {
                 id={`filter-${key}`}
                 value={filters[key as keyof typeof filters] as string}
                 onChange={(e) => updateFilter(key, e.target.value)}
-                className="w-full h-8 rounded-md border border-border bg-muted/40 px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full h-8 rounded border border-[#E8E8E5] bg-white px-2 text-xs text-[#1A1A1A] focus-visible:outline-none focus-visible:border-[#2563EB]"
               >
-                {options.map((o) => (
-                  <option key={o} value={o}>{o || `All ${label}s`}</option>
-                ))}
+                {options.map((o) => <option key={o} value={o}>{o || `All ${label}s`}</option>)}
               </select>
             </div>
           ))}
         </div>
       )}
 
-      {/* ── Ticket table ─────────────────────────────────────────── */}
+      {/* ── Ticket table ── */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" aria-label="Loading tickets…" />
+          <Loader2 className="w-4 h-4 animate-spin text-[#2563EB]" strokeWidth={1.5} aria-label="Loading…" />
         </div>
       ) : tickets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <Inbox className="w-10 h-10 mb-3 opacity-25" aria-hidden="true" />
+        <div className="flex flex-col items-center justify-center py-20 text-[#6B6B6B]">
           <p className="text-sm font-medium">No tickets found</p>
-          <p className="text-xs mt-1">Try adjusting your filters or search</p>
+          <p className="text-xs mt-0.5">Try adjusting your filters or search</p>
         </div>
       ) : (
         <div
-          className="rounded-lg border border-border overflow-hidden"
+          className="rounded border border-[#E8E8E5] overflow-hidden"
           role="table"
-          aria-label="Tickets list"
+          aria-label="Tickets"
         >
-          {/* Column headers — visible table structure */}
+          {/* Column headers */}
           <div
-            className="hidden md:grid grid-cols-[3px_1fr_130px_100px_110px_32px] items-center gap-4 px-4 py-2 border-b border-border"
-            style={{ background: 'hsl(var(--surface-2))' }}
+            className="hidden md:grid items-center gap-5 px-5 py-2.5 border-b border-[#E8E8E5] bg-[#FAFAF9]"
+            style={{ gridTemplateColumns: '3px 1fr 130px 100px 110px' }}
             role="row"
           >
             <div aria-hidden="true" />
-            <ColHeader role="columnheader">Title</ColHeader>
-            <ColHeader role="columnheader">Status</ColHeader>
-            <ColHeader role="columnheader">Priority</ColHeader>
-            <ColHeader role="columnheader">Created</ColHeader>
-            <div aria-hidden="true" />
+            <ColHeader>Title</ColHeader>
+            <ColHeader>Status</ColHeader>
+            <ColHeader>Priority</ColHeader>
+            <ColHeader>Created</ColHeader>
           </div>
 
-          {/* Rows */}
           <div role="rowgroup">
             {tickets.map((ticket) => (
               <TicketRow key={ticket._id} ticket={ticket} />
@@ -230,11 +191,11 @@ export default function TicketsPage() {
         </div>
       )}
 
-      {/* ── Pagination ───────────────────────────────────────────── */}
+      {/* ── Pagination ── */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
-          <p className="text-xs text-muted-foreground font-mono">
-            Page {pagination.page} / {pagination.totalPages}
+        <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#E8E8E5]">
+          <p className="text-xs text-[#6B6B6B] font-mono">
+            {pagination.page} / {pagination.totalPages}
           </p>
           <div className="flex gap-1.5">
             <Button
@@ -244,7 +205,7 @@ export default function TicketsPage() {
               onClick={() => updateFilter('page', pagination.page - 1)}
               aria-label="Previous page"
             >
-              <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+              <ChevronLeft className="w-3.5 h-3.5" strokeWidth={1.5} aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
@@ -253,11 +214,22 @@ export default function TicketsPage() {
               onClick={() => updateFilter('page', pagination.page + 1)}
               aria-label="Next page"
             >
-              <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+              <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} aria-hidden="true" />
             </Button>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ColHeader({ children, role }: { children: React.ReactNode; role?: string }) {
+  return (
+    <div
+      className="text-xs font-medium text-[#6B6B6B]"
+      role={role ?? 'columnheader'}
+    >
+      {children}
     </div>
   );
 }
@@ -268,97 +240,74 @@ function TicketRow({ ticket }: { ticket: Ticket }) {
   return (
     <Link
       href={`/dashboard/tickets/${ticket._id}`}
-      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 focus-visible:ring-inset"
       role="row"
-      aria-label={`Ticket: ${ticket.title}, ${ticket.status}, ${ticket.priority} priority`}
+      aria-label={`${ticket.title}, ${ticket.status}, ${ticket.priority} priority`}
     >
-      {/* Desktop: table-row layout */}
+      {/* Desktop */}
       <div
         className={cn(
-          'hidden md:grid grid-cols-[3px_1fr_130px_100px_110px_32px] items-center gap-4 px-4 py-3',
-          'ticket-row group',
+          'hidden md:grid items-center gap-5 px-5 py-3.5 ticket-row group',
           isCriticalOpen && 'critical-pulse',
+          'pl-[calc(1.25rem+2px)]', // account for priority bar
           getPriorityBarClass(ticket.priority),
         )}
+        style={{ gridTemplateColumns: '0px 1fr 130px 100px 110px' }}
         role="cell"
       >
-        {/* Left bar (handled by getPriorityBarClass on the container) */}
         <div aria-hidden="true" />
 
         {/* Title + meta */}
         <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors duration-100">
+          <p className="text-sm font-medium text-[#1A1A1A] truncate group-hover:text-[#2563EB] transition-colors duration-100">
             {ticket.title}
           </p>
-          <p className="text-2xs text-muted-foreground mt-0.5 truncate">
-            <span>{ticket.createdBy?.name}</span>
-            {ticket.assignedTo && (
-              <span className="text-muted-foreground/50"> · {ticket.assignedTo.name}</span>
-            )}
-            {ticket.category && (
-              <span className="text-muted-foreground/50"> · {ticket.category}</span>
-            )}
+          <p className="text-xs text-[#A1A1A1] mt-0.5 truncate font-mono">
+            {ticket.createdBy?.name}
+            {ticket.assignedTo && <span className="text-[#C8C8C5]"> · {ticket.assignedTo.name}</span>}
           </p>
         </div>
 
-        {/* Status badge */}
+        {/* Status — dot + label */}
         <div>
-          <span
-            className={cn(
-              'inline-flex items-center text-xs px-2 py-0.5 rounded-sm badge-transition',
-              getStatusClass(ticket.status)
-            )}
-          >
+          <span className={cn('badge-transition', getStatusClass(ticket.status))}>
             {ticket.status}
           </span>
         </div>
 
-        {/* Priority badge */}
+        {/* Priority — square pip + label */}
         <div>
-          <span
-            className={cn(
-              'inline-flex items-center text-xs px-2 py-0.5 rounded-sm',
-              getPriorityClass(ticket.priority)
-            )}
-          >
+          <span className={getPriorityClass(ticket.priority)}>
             {ticket.priority}
           </span>
         </div>
 
         {/* Time */}
-        <div>
-          <p className="text-xs text-muted-foreground font-mono">{timeAgo(ticket.createdAt)}</p>
-        </div>
-
-        {/* Chevron */}
-        <ArrowRight
-          className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors duration-100"
-          aria-hidden="true"
-        />
+        <p className="text-xs text-[#A1A1A1] font-mono">{timeAgo(ticket.createdAt)}</p>
       </div>
 
-      {/* Mobile: stacked layout */}
+      {/* Mobile */}
       <div
         className={cn(
-          'md:hidden flex items-start gap-3 px-4 py-3 ticket-row group',
+          'md:hidden flex items-start gap-3 px-4 py-3.5 ticket-row group',
+          'pl-[calc(1rem+2px)]',
           getPriorityBarClass(ticket.priority),
         )}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-            <span className={cn('text-2xs px-1.5 py-0.5 rounded-sm badge-transition', getStatusClass(ticket.status))}>
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className={cn('badge-transition', getStatusClass(ticket.status))}>
               {ticket.status}
             </span>
-            <span className={cn('text-2xs px-1.5 py-0.5 rounded-sm', getPriorityClass(ticket.priority))}>
+            <span className={getPriorityClass(ticket.priority)}>
               {ticket.priority}
             </span>
           </div>
-          <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+          <p className="text-sm font-medium text-[#1A1A1A] truncate group-hover:text-[#2563EB] transition-colors">
             {ticket.title}
           </p>
-          <p className="text-2xs text-muted-foreground mt-0.5 font-mono">{timeAgo(ticket.createdAt)}</p>
+          <p className="text-xs text-[#A1A1A1] mt-0.5 font-mono">{timeAgo(ticket.createdAt)}</p>
         </div>
-        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 mt-1 flex-shrink-0" aria-hidden="true" />
       </div>
     </Link>
   );

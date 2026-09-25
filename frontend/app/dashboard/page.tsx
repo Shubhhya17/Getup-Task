@@ -5,34 +5,50 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { dashboardApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn, timeAgo, getPriorityColor, getStatusColor, getPriorityClass, getPriorityBarClass } from '@/lib/utils';
 import {
-  Ticket,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  Activity,
-  Loader2,
-  Plus,
-  ArrowRight,
-} from 'lucide-react';
+  cn, timeAgo, getPriorityColor, getStatusColor,
+  getPriorityBadgeClass, getPriorityBarClass,
+} from '@/lib/utils';
+import { Loader2, ArrowRight } from 'lucide-react';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
+
+/*
+ * Dashboard — Meridian design.
+ *
+ * THE ONE animation moment: KPI counter reveal (kpi-reveal class).
+ *
+ * Data hierarchy:
+ *   1. KPI numerals — largest elements, JetBrains Mono
+ *   2. Status/priority indicators — full saturation
+ *   3. Charts — muted grid, semantic palette bars/cells
+ *   4. All other text — quiet, secondary
+ *
+ * No icons as decoration. Lucide only for: ArrowRight (navigation).
+ */
+
+const CHART_TOOLTIP = {
+  background: '#FFFFFF',
+  border: '1px solid #E8E8E5',
+  borderRadius: '6px',
+  fontSize: '11px',
+  fontFamily: "'JetBrains Mono', monospace",
+  color: '#1A1A1A',
+  padding: '6px 10px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+};
+
+const AXIS_TICK = {
+  fill: '#A1A1A1',
+  fontSize: 11,
+  fontFamily: "'JetBrains Mono', monospace",
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats]       = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -50,156 +66,119 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Loader2 className="w-5 h-5 animate-spin text-primary" aria-label="Loading…" />
+        <Loader2 className="w-4 h-4 animate-spin text-[#2563EB]" strokeWidth={1.5} aria-label="Loading…" />
       </div>
     );
   }
 
-  /* ── Non-admin welcome ──────────────────────────────────────── */
+  /* ── Non-admin ── */
   if (user?.role !== 'admin') {
     return (
-      <div className="pt-14 lg:pt-0">
-        <div className="mb-6 pt-2">
-          <h1 className="text-xl font-semibold text-foreground">
+      <div className="pt-12 lg:pt-0">
+        <div className="mb-8 pt-2">
+          <h1 className="text-xl font-semibold text-[#1A1A1A]">
             Welcome back, {user?.name?.split(' ')[0]}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-[#6B6B6B] mt-1">
             {user?.role === 'customer'
               ? 'Manage your support tickets and track their progress.'
               : 'View and manage your assigned tickets.'}
           </p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <NonAdminCard
-            title="My Tickets"
-            description="View all your support tickets"
-            href="/dashboard/tickets"
-            icon={Ticket}
-          />
+        <div className="flex flex-col sm:flex-row gap-3 max-w-lg">
+          <QuickLink href="/dashboard/tickets" label="My Tickets" description="View all tickets" />
           {user?.role === 'customer' && (
-            <NonAdminCard
-              title="Submit a Ticket"
-              description="Report a new issue or request"
-              href="/dashboard/tickets/new"
-              icon={Plus}
-              isPrimary
-            />
+            <QuickLink href="/dashboard/tickets/new" label="Submit a Ticket" description="Report an issue" isPrimary />
           )}
         </div>
       </div>
     );
   }
 
-  /* ── Admin dashboard ────────────────────────────────────────── */
-  const totalTickets = stats?.byStatus?.reduce((s: number, i: any) => s + i.count, 0) || 0;
-  const openCount    = stats?.byStatus?.find((s: any) => s.status === 'Open')?.count || 0;
+  /* ── Admin dashboard ── */
+  const totalTickets  = stats?.byStatus?.reduce((s: number, i: any) => s + i.count, 0) || 0;
+  const openCount     = stats?.byStatus?.find((s: any) => s.status === 'Open')?.count || 0;
   const resolvedCount = stats?.byStatus?.find((s: any) => s.status === 'Resolved')?.count || 0;
   const stalledCount  = stats?.stalledTickets?.count || 0;
   const avgHours      = stats?.resolutionTime?.avgResolutionHours;
 
-  const tooltipStyle = {
-    background: 'hsl(215 12% 14%)',
-    border: '1px solid hsl(215 10% 19%)',
-    borderRadius: '6px',
-    fontSize: '11px',
-    fontFamily: "'JetBrains Mono', monospace",
-    color: 'hsl(213 20% 90%)',
-    padding: '6px 10px',
-    boxShadow: 'none',
-  };
-
   return (
-    <div className="pt-14 lg:pt-0">
+    <div className="pt-12 lg:pt-0">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6 pt-2">
+      <div className="flex items-center justify-between mb-8 pt-2">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Overview</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Support operations dashboard</p>
+          <h1>Overview</h1>
+          <p className="text-sm text-[#6B6B6B] mt-1">Support operations dashboard</p>
         </div>
         <Link
           href="/dashboard/tickets"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-[#6B6B6B] hover:text-[#2563EB] transition-colors"
         >
           All tickets
-          <ArrowRight className="w-3 h-3" aria-hidden="true" />
+          <ArrowRight className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
         </Link>
       </div>
 
-      {/* ── KPI row — THE animated moment ───────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" role="list" aria-label="Key metrics">
-        <KpiCard
-          title="Total tickets"
-          value={totalTickets}
-          icon={Ticket}
-          index={0}
-          aria-label={`Total tickets: ${totalTickets}`}
-        />
-        <KpiCard
-          title="Open"
-          value={openCount}
-          icon={Activity}
-          index={1}
-          valueColor="hsl(var(--status-open))"
-        />
-        <KpiCard
-          title="Resolved"
-          value={resolvedCount}
-          icon={CheckCircle}
-          index={2}
-          valueColor="hsl(var(--status-resolved))"
-        />
+      {/* ── KPI row — THE ONE animated moment ───────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#E8E8E5] rounded overflow-hidden mb-4 border border-[#E8E8E5]" role="list" aria-label="Key metrics">
+        <KpiCard title="Total tickets"  value={totalTickets}  index={0} />
+        <KpiCard title="Open"           value={openCount}     index={1} valueColor="#15803D" />
+        <KpiCard title="Resolved"       value={resolvedCount} index={2} valueColor="#1D4ED8" />
         <KpiCard
           title="Stalled >48h"
           value={stalledCount}
-          icon={AlertTriangle}
           index={3}
-          valueColor={stalledCount > 0 ? 'hsl(var(--priority-high))' : undefined}
-          aria-label={`Stalled tickets: ${stalledCount}`}
+          valueColor={stalledCount > 0 ? '#C2410C' : '#A1A1A1'}
         />
       </div>
 
-      {/* ── Resolution time + status donut ──────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+      {stats?.aiSummary && (
+        <div className="ai-panel p-4 mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-semibold text-[hsl(var(--ai-ink))]">
+              AI Queue Summary
+            </span>
+          </div>
+          <p className="text-sm text-[#1A1A1A] leading-relaxed">
+            {stats.aiSummary}
+          </p>
+        </div>
+      )}
+
+      {/* ── Resolution time + status donut ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {/* Avg resolution */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" aria-hidden="true" />
-              Avg. resolution
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2">
+          <CardHeader><CardTitle>Avg. resolution</CardTitle></CardHeader>
+          <CardContent className="pt-3">
             <p
-              className="stat-value text-3xl text-foreground"
-              aria-label={`Average resolution time: ${avgHours !== null && avgHours !== undefined ? `${avgHours.toFixed(1)} hours` : 'Not available'}`}
+              className="stat-value text-[2rem] text-[#1A1A1A]"
+              aria-label={avgHours != null ? `${avgHours.toFixed(1)} hours` : 'Not available'}
             >
-              {avgHours !== null && avgHours !== undefined
-                ? `${avgHours.toFixed(1)}h`
-                : <span className="text-muted-foreground">—</span>}
+              {avgHours != null
+                ? <>{avgHours.toFixed(1)}<span className="text-base font-sans font-normal text-[#6B6B6B] ml-1">h</span></>
+                : <span className="text-[#A1A1A1]">—</span>}
             </p>
-            <p className="text-xs text-muted-foreground mt-1 font-mono">
-              {stats?.resolutionTime?.resolvedTicketCount || 0} resolved tickets
+            <p className="text-xs text-[#6B6B6B] mt-2 font-mono">
+              {stats?.resolutionTime?.resolvedTicketCount || 0} resolved
             </p>
           </CardContent>
         </Card>
 
-        {/* Status distribution */}
+        {/* Status distribution donut */}
         <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Tickets by status</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Tickets by status</CardTitle></CardHeader>
           <CardContent className="pt-2">
-            <ResponsiveContainer width="100%" height={140}>
+            <ResponsiveContainer width="100%" height={150}>
               <PieChart>
                 <Pie
                   data={stats?.byStatus || []}
                   dataKey="count"
                   nameKey="status"
-                  cx="40%"
+                  cx="35%"
                   cy="50%"
-                  innerRadius={42}
-                  outerRadius={62}
+                  innerRadius={40}
+                  outerRadius={60}
                   paddingAngle={2}
                   strokeWidth={0}
                 >
@@ -212,48 +191,27 @@ export default function DashboardPage() {
                   align="right"
                   verticalAlign="middle"
                   iconType="circle"
-                  iconSize={8}
-                  formatter={(value) => (
-                    <span style={{ fontSize: '11px', color: 'hsl(217 11% 56%)' }}>{value}</span>
-                  )}
+                  iconSize={7}
+                  formatter={(v) => <span style={{ fontSize: '11px', color: '#6B6B6B' }}>{v}</span>}
                 />
-                <Tooltip contentStyle={tooltipStyle} />
+                <Tooltip contentStyle={CHART_TOOLTIP} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Priority chart + stalled tickets ────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
+      {/* ── Priority chart + stalled tickets ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Tickets by priority</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Tickets by priority</CardTitle></CardHeader>
           <CardContent className="pt-2">
             <ResponsiveContainer width="100%" height={180}>
-              <BarChart
-                data={stats?.byPriority || []}
-                barCategoryGap="35%"
-              >
-                <CartesianGrid
-                  strokeDasharray="2 2"
-                  stroke="hsl(215 10% 19%)"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="priority"
-                  tick={{ fill: 'hsl(217 11% 56%)', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  tick={{ fill: 'hsl(217 11% 56%)', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
-                  tickLine={false}
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'hsl(215 10% 19% / 0.6)' }} />
+              <BarChart data={stats?.byPriority || []} barCategoryGap="40%">
+                <CartesianGrid strokeDasharray="2 2" stroke="#F4F4F2" vertical={false} />
+                <XAxis dataKey="priority" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+                <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={CHART_TOOLTIP} cursor={{ fill: '#F4F4F2' }} />
                 <Bar dataKey="count" radius={[3, 3, 0, 0]}>
                   {(stats?.byPriority || []).map((entry: any) => (
                     <Cell key={entry.priority} fill={getPriorityColor(entry.priority)} />
@@ -267,43 +225,37 @@ export default function DashboardPage() {
         {/* Stalled tickets */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5">
-              <AlertTriangle
-                className={cn('w-3.5 h-3.5', stalledCount > 0 ? 'text-priority-high' : 'text-muted-foreground')}
-                aria-hidden="true"
-              />
-              Stalled tickets
-              <span className="text-2xs font-mono text-muted-foreground ml-auto">&gt;48h open</span>
+            <CardTitle className="flex items-center justify-between">
+              <span>Stalled tickets</span>
+              <span className="text-[10px] font-mono text-[#A1A1A1]">&gt;48h open</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent className="pt-3">
             {stalledCount === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                <CheckCircle className="w-7 h-7 mb-2 text-status-open/50" aria-hidden="true" />
-                <p className="text-sm">No stalled tickets</p>
-                <p className="text-xs mt-0.5">Queue is moving normally</p>
+              <div className="py-8 text-center">
+                <p className="text-sm font-medium text-[#15803D]">Queue is healthy</p>
+                <p className="text-xs text-[#6B6B6B] mt-0.5">No stalled tickets</p>
               </div>
             ) : (
-              <div className="space-y-1 max-h-44 overflow-y-auto scrollbar-thin" role="list" aria-label="Stalled tickets">
+              <div className="space-y-1 max-h-44 overflow-y-auto scrollbar-thin" role="list">
                 {(stats?.stalledTickets?.tickets || []).map((t: any) => (
                   <Link
                     key={t._id}
                     href={`/dashboard/tickets/${t._id}`}
                     className={cn(
-                      'flex items-center justify-between px-3 py-2 rounded-md group',
-                      'hover:bg-muted/40 transition-colors duration-100',
-                      'border-l-2',
+                      'flex items-center gap-3 px-3 py-2 rounded hover:bg-[#FAFAF9] transition-colors group',
+                      'pl-4',
                       getPriorityBarClass(t.priority),
                     )}
                     role="listitem"
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-[#1A1A1A] truncate group-hover:text-[#2563EB] transition-colors">
                         {t.title}
                       </p>
-                      <p className="text-2xs text-muted-foreground font-mono mt-0.5">{t.ageHours?.toFixed(0)}h stalled</p>
+                      <p className="text-xs text-[#6B6B6B] font-mono">{t.ageHours?.toFixed(0)}h</p>
                     </div>
-                    <span className={cn('text-2xs px-2 py-0.5 rounded-sm ml-3 flex-shrink-0', getPriorityClass(t.priority))}>
+                    <span className={cn('text-xs px-1.5 py-0.5 rounded', getPriorityBadgeClass(t.priority))}>
                       {t.priority}
                     </span>
                   </Link>
@@ -317,36 +269,25 @@ export default function DashboardPage() {
   );
 }
 
-/* ── KPI Card — the ONE orchestrated animation moment ── */
+/* ── KPI Card — the ONE orchestrated animation ── */
 function KpiCard({
-  title,
-  value,
-  icon: Icon,
-  index,
-  valueColor,
-  ...rest
+  title, value, index, valueColor,
 }: {
   title: string;
   value: number;
-  icon: React.ElementType;
   index: number;
   valueColor?: string;
-  [key: string]: any;
 }) {
   return (
     <div
-      className="kpi-reveal panel p-4"
-      style={{ animationDelay: `${index * 0.07}s` }}
+      className="kpi-reveal bg-white px-5 py-5"
+      style={{ animationDelay: `${index * 0.06}s` }}
       role="listitem"
-      {...rest}
     >
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs text-muted-foreground font-medium">{title}</p>
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
-      </div>
+      <p className="text-xs text-[#6B6B6B] mb-3">{title}</p>
       <p
-        className="stat-value text-2xl"
-        style={{ color: valueColor ?? 'hsl(var(--foreground))' }}
+        className="stat-value text-3xl"
+        style={{ color: valueColor ?? '#1A1A1A' }}
       >
         {value.toLocaleString()}
       </p>
@@ -354,44 +295,30 @@ function KpiCard({
   );
 }
 
-/* ── Non-admin quick-action card ── */
-function NonAdminCard({
-  title,
-  description,
-  href,
-  icon: Icon,
-  isPrimary,
+/* ── Non-admin quick-link ── */
+function QuickLink({
+  href, label, description, isPrimary,
 }: {
-  title: string;
-  description: string;
   href: string;
-  icon: React.ElementType;
+  label: string;
+  description: string;
   isPrimary?: boolean;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        'flex items-start gap-4 p-5 rounded-lg border transition-colors duration-100',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'flex-1 px-5 py-4 rounded border transition-colors duration-100',
+        'focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-[#2563EB]',
         isPrimary
-          ? 'border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50'
-          : 'border-border surface-1 hover:bg-muted/30'
+          ? 'border-[#BFDBFE] bg-[#EFF6FF] hover:bg-[#DBEAFE]'
+          : 'border-[#E8E8E5] bg-white hover:bg-[#FAFAF9]'
       )}
     >
-      <div
-        className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
-        style={{
-          background: isPrimary ? 'hsl(var(--primary) / 0.12)' : 'hsl(var(--surface-2))',
-        }}
-        aria-hidden="true"
-      >
-        <Icon className={cn('w-4 h-4', isPrimary ? 'text-primary' : 'text-muted-foreground')} />
-      </div>
-      <div>
-        <h3 className="text-sm font-medium text-foreground">{title}</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-      </div>
+      <p className={cn('text-sm font-medium', isPrimary ? 'text-[#1D4ED8]' : 'text-[#1A1A1A]')}>
+        {label}
+      </p>
+      <p className="text-xs text-[#6B6B6B] mt-0.5">{description}</p>
     </Link>
   );
 }

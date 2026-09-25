@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
-const { triageTicket } = require('../services/aiService');
+const { triageTicket, generateEmbedding, cosineSimilarity, generateAgentReply } = require('../services/aiService');
 const { buildAttachmentMeta } = require('../middleware/upload');
 
 // ── Visibility helpers ────────────────────────────────────────────────────────
@@ -66,9 +66,25 @@ exports.createTicket = async (req, res, next) => {
 
   const ticket = await Ticket.create(ticketData);
 
+  // Generate embedding for the new ticket
+  const embedding = await generateEmbedding(`${title} ${description}`);
+  ticket.embedding = embedding;
+
+  // Find similar open tickets
+  let similarTickets = [];
+  if (embedding.length > 0) {
+    const openTickets = await Ticket.find({ status: 'Open', _id: { $ne: ticket._id } }).select('title embedding').lean();
+    const scored = openTickets
+      .map(t => ({ ticketId: t._id, title: t.title, score: cosineSimilarity(embedding, t.embedding || []) }))
+      .filter(t => !isNaN(t.score) && t.score > 0.75) // basic threshold
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+    similarTickets = scored;
+  }
+
   // AI Triage — runs after ticket is saved so creation never blocks on AI
   const aiResult = await triageTicket(title, description);
-  ticket.aiSuggestion = { ...aiResult, generatedAt: new Date() };
+  ticket.aiSuggestion = { ...aiResult, similarTickets, generatedAt: new Date() };
   await ticket.save();
 
   await ticket.populate('createdBy', 'name email role');
@@ -91,23 +107,66 @@ exports.getTickets = async (req, res, next) => {
   if (priority) filter.priority = priority;
   if (category) filter.category = category;
 
-  // Full-text search on indexed title + description
+  const skip = (page - 1) * limit;
+  let tickets = [];
+  let total = 0;
+
+  // Semantic search vs Literal search
   if (search) {
-    filter.$text = { $search: search };
+    try {
+      const searchEmbedding = await generateEmbedding(search);
+      if (searchEmbedding && searchEmbedding.length > 0) {
+        // Semantic search
+        const allFiltered = await Ticket.find(filter).select('-comments -activityLog +embedding').lean();
+        const scored = allFiltered
+          .map(t => ({ ...t, _score: cosineSimilarity(searchEmbedding, t.embedding || []) }))
+          .sort((a, b) => b._score - a._score);
+        
+        // Literal search fallback in case no good matches
+        if (scored.length > 0 && scored[0]._score < 0.6) {
+          throw new Error('No good semantic matches, fallback to literal');
+        }
+
+        total = scored.length;
+        tickets = scored.slice(skip, skip + Number(limit));
+        
+        // Remove embeddings from response
+        tickets.forEach(t => delete t.embedding);
+      } else {
+        throw new Error('Empty embedding');
+      }
+    } catch (err) {
+      // Literal search fallback
+      filter.$text = { $search: search };
+      [tickets, total] = await Promise.all([
+        Ticket.find(filter)
+          .populate('createdBy', 'name email')
+          .populate('assignedTo', 'name email')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(Number(limit))
+          .select('-comments -activityLog'),
+        Ticket.countDocuments(filter),
+      ]);
+    }
+  } else {
+    // Normal query
+    [tickets, total] = await Promise.all([
+      Ticket.find(filter)
+        .populate('createdBy', 'name email')
+        .populate('assignedTo', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .select('-comments -activityLog'),
+      Ticket.countDocuments(filter),
+    ]);
   }
 
-  const skip = (page - 1) * limit;
-
-  const [tickets, total] = await Promise.all([
-    Ticket.find(filter)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .select('-comments -activityLog'), // lean list — details loaded separately
-    Ticket.countDocuments(filter),
-  ]);
+  // Ensure population for semantic search results if needed
+  if (search && tickets.length > 0 && !tickets[0].createdBy?.name) {
+    await Ticket.populate(tickets, { path: 'createdBy assignedTo', select: 'name email' });
+  }
 
   res.json({
     success: true,
@@ -317,4 +376,20 @@ exports.acceptAiSuggestion = async (req, res, next) => {
   await ticket.save();
 
   res.json({ success: true, data: ticket });
+};
+
+/**
+ * POST /api/tickets/:id/ai-reply
+ * Generates an agent reply based on tone
+ */
+exports.generateAgentReplyAssist = async (req, res, next) => {
+  const { tone } = req.body; // e.g., 'concise', 'empathetic', 'professional'
+
+  const ticket = await Ticket.findById(req.params.id)
+    .populate('comments.author', 'name email role');
+  if (!ticket) return next(new AppError('Ticket not found', 404));
+
+  const { reply } = await generateAgentReply(ticket, ticket.comments, tone);
+
+  res.json({ success: true, data: { draftReply: reply } });
 };

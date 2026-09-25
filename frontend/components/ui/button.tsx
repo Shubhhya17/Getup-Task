@@ -2,39 +2,47 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
+/*
+ * Button — Meridian design.
+ * ONE accent (#2563EB) for default variant. Used sparingly: primary CTA only.
+ * All other variants are quiet (white bg + border, or transparent).
+ */
 const buttonVariants = cva(
   [
-    'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium',
-    'transition-colors duration-100',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
+    'inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium',
+    'rounded border transition-colors duration-100',
+    'focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-[#2563EB] focus-visible:outline-offset-2',
     'disabled:pointer-events-none disabled:opacity-40',
     'active:scale-[0.98]',
   ].join(' '),
   {
     variants: {
       variant: {
+        /* The ONE accent color — primary CTA only */
         default:
-          'bg-primary text-primary-foreground hover:bg-primary/85',
-        destructive:
-          'bg-destructive/10 text-destructive border border-destructive/30 hover:bg-destructive/20',
+          'bg-[#2563EB] text-white border-[#2563EB] hover:bg-[#1D4ED8] hover:border-[#1D4ED8]',
+        /* Quiet secondary actions */
         outline:
-          'border border-border bg-transparent text-foreground hover:bg-muted/60',
+          'bg-white text-[#1A1A1A] border-[#E8E8E5] hover:bg-[#FAFAF9] hover:border-[#D1D1CE]',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/70',
+          'bg-[#F4F4F2] text-[#1A1A1A] border-[#E8E8E5] hover:bg-[#EBEBEB]',
         ghost:
-          'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+          'bg-transparent border-transparent text-[#6B6B6B] hover:bg-[#F4F4F2] hover:text-[#1A1A1A]',
+        /* Destructive — used sparingly */
+        destructive:
+          'bg-[#FEF2F2] text-[#B91C1C] border-[#FECACA] hover:bg-[#FEE2E2]',
         link:
-          'text-primary underline-offset-4 hover:underline h-auto p-0',
-        /* Action that accepts an AI suggestion */
+          'bg-transparent border-transparent text-[#2563EB] underline-offset-4 hover:underline p-0 h-auto',
+        /* AI suggestion accept — subdued, clearly secondary */
         'ai-accept':
-          'bg-[hsl(var(--ai-surface))] text-[hsl(var(--ai-ink))] border border-[hsl(var(--ai-border))] hover:bg-[hsl(var(--primary)/0.1)] hover:text-primary hover:border-[hsl(var(--primary)/0.4)] text-xs',
+          'bg-white text-[hsl(var(--ai-ink))] border-[hsl(var(--ai-border))] hover:bg-[hsl(var(--ai-surface))] text-xs',
       },
       size: {
-        default: 'h-9 px-3.5 py-2',
-        sm:      'h-7 rounded-sm px-2.5 text-xs',
-        lg:      'h-10 px-5 text-base',
-        icon:    'h-9 w-9',
-        'icon-sm': 'h-7 w-7',
+        default:    'h-8 px-3.5 text-sm',
+        sm:         'h-7 px-2.5 text-xs rounded',
+        lg:         'h-10 px-5 text-base',
+        icon:       'h-8 w-8 p-0',
+        'icon-sm':  'h-7 w-7 p-0',
       },
     },
     defaultVariants: {
@@ -49,15 +57,13 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
-    return (
-      <button
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
+  ({ className, variant, size, ...props }, ref) => (
+    <button
+      className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
+      {...props}
+    />
+  )
 );
 Button.displayName = 'Button';
 

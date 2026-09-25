@@ -19,6 +19,9 @@ const mongoose = require('mongoose');
  *         fallback:
  *           type: boolean
  *           description: true if AI call failed and a mock response was used
+ *         sentiment:
+ *           type: string
+ *           enum: [Positive, Neutral, Frustrated]
  *         generatedAt:
  *           type: string
  *           format: date-time
@@ -161,7 +164,15 @@ const aiSuggestionSchema = new mongoose.Schema(
     priority: { type: String, enum: ['Low', 'Medium', 'High', 'Critical'] },
     summary: { type: String },
     draftReply: { type: String },
+    sentiment: { type: String, enum: ['Positive', 'Neutral', 'Frustrated'] },
     fallback: { type: Boolean, default: false },
+    similarTickets: [
+      {
+        ticketId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' },
+        title: { type: String },
+        score: { type: Number },
+      }
+    ],
     generatedAt: { type: Date, default: Date.now },
   },
   { _id: false }
@@ -220,6 +231,10 @@ const ticketSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    embedding: {
+      type: [Number], // For in-memory semantic search
+      select: false // Exclude by default to save memory
+    }
   },
   {
     timestamps: true,

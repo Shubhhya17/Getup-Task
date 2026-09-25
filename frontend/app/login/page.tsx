@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/utils';
-import { Ticket, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const DEMO_CREDS = {
   admin:    { email: 'admin@example.com',    password: 'Admin1234!' },
@@ -20,7 +20,7 @@ const DEMO_CREDS = {
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,39 +47,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center auth-bg p-4"
-      role="main"
-    >
-      <div className="w-full max-w-sm">
-        {/* Product mark */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center"
-              style={{
-                background: 'hsl(var(--primary) / 0.12)',
-                border: '1px solid hsl(var(--primary) / 0.25)',
-              }}
-              aria-hidden="true"
-            >
-              <Ticket className="w-4.5 h-4.5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Getup Support</p>
-              <p className="text-2xs text-muted-foreground">Support Operations Platform</p>
-            </div>
-          </div>
-          <h1 className="text-xl font-semibold text-foreground">Sign in to your account</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Enter your credentials to access the portal
-          </p>
+    <div className="min-h-screen auth-bg flex items-center justify-center p-4" role="main">
+      <div className="w-full max-w-[360px]">
+
+        {/* Product wordmark — typographic only */}
+        <div className="mb-10">
+          <p className="text-xl font-semibold text-[#1A1A1A] tracking-tight">Getup Support</p>
+          <p className="text-sm text-[#6B6B6B] mt-1">Sign in to your account</p>
         </div>
 
-        {/* Login form */}
+        {/* Login form — white card with hairline border */}
         <div
-          className="rounded-lg border border-border p-6 mb-5 shadow-card"
-          style={{ background: 'hsl(var(--surface-1))' }}
+          className="rounded-lg border border-[#E8E8E5] bg-white px-6 py-6 mb-4"
+          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
         >
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-1.5">
@@ -111,13 +91,13 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full mt-2"
+              className="w-full mt-1"
               disabled={isLoading}
               id="login-submit"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={1.5} aria-hidden="true" />
                   Signing in…
                 </>
               ) : (
@@ -127,28 +107,22 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Demo access — clearly a secondary section */}
-        <div
-          className="rounded-lg border border-border p-4 mb-5"
-          style={{ background: 'hsl(var(--surface-2))' }}
-          aria-label="Demo account access"
-        >
-          <p className="text-xs text-muted-foreground mb-3 font-medium">
-            Demo access — fills credentials
-          </p>
+        {/* Demo access — secondary panel, clearly separated */}
+        <div className="rounded border border-[#E8E8E5] bg-[#FAFAF9] px-4 py-3 mb-4">
+          <p className="text-xs text-[#6B6B6B] mb-2.5 font-medium">Demo accounts</p>
           <div className="grid grid-cols-3 gap-2">
             {(['admin', 'agent', 'customer'] as const).map((role) => (
               <button
                 key={role}
                 type="button"
                 onClick={() => fillDemo(role)}
-                className={[
-                  'text-xs py-1.5 px-2 rounded-md border border-border',
-                  'text-muted-foreground hover:text-foreground hover:border-border/80',
-                  'transition-colors duration-100 capitalize font-medium',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                ].join(' ')}
                 id={`demo-${role}`}
+                className={[
+                  'text-xs py-1.5 px-2 rounded border border-[#E8E8E5] bg-white',
+                  'text-[#6B6B6B] hover:text-[#1A1A1A] hover:border-[#D1D1CE]',
+                  'transition-colors duration-100 capitalize font-medium',
+                  'focus-visible:outline-none focus-visible:outline-2 focus-visible:outline-[#2563EB]',
+                ].join(' ')}
               >
                 {role}
               </button>
@@ -156,11 +130,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-[#6B6B6B]">
           No account?{' '}
           <Link
             href="/register"
-            className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            className="text-[#2563EB] hover:underline focus-visible:outline-none"
           >
             Create one
           </Link>

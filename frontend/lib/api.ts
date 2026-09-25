@@ -58,6 +58,8 @@ export const ticketApi = {
   getActivity: (id: string) => api.get(`/tickets/${id}/activity`),
   acceptAiSuggestion: (id: string, data: { category?: string; priority?: string }) =>
     api.post(`/tickets/${id}/ai-suggestion/accept`, data),
+  generateAiReply: (id: string, tone: string) =>
+    api.post(`/tickets/${id}/ai-reply`, { tone }),
 };
 
 // ── Users ─────────────────────────────────────────────────────────────────────
@@ -103,11 +105,19 @@ export interface User {
   role: 'customer' | 'agent' | 'admin';
 }
 
+export interface SimilarTicket {
+  ticketId: string;
+  title: string;
+  score: number;
+}
+
 export interface AiSuggestion {
   category: string;
   priority: string;
   summary: string;
   draftReply: string;
+  sentiment?: string;
+  similarTickets?: SimilarTicket[];
   fallback: boolean;
   generatedAt: string;
 }

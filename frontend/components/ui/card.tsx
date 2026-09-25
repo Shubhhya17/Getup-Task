@@ -2,10 +2,9 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /*
- * Card — structural container in the Slate Operations design system.
- * NOT a decorative card: no hover-lift, no uniform shadow.
- * Use it for grouped content that needs visual separation.
- * Surface hierarchy: Card sits at surface-1 by default.
+ * Card — Meridian design.
+ * White background, hairline border (#E8E8E5), zero box-shadow.
+ * Use panel-white class from globals for identical effect inline.
  */
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -13,8 +12,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        'surface-1 border border-border rounded-lg shadow-card',
-        'text-card-foreground',
+        'bg-white border border-[#E8E8E5] rounded text-[#1A1A1A]',
         className
       )}
       {...props}
@@ -27,18 +25,19 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col space-y-1 px-5 pt-5 pb-0', className)}
+      className={cn('flex flex-col space-y-0.5 px-5 pt-4 pb-0', className)}
       {...props}
     />
   )
 );
 CardHeader.displayName = 'CardHeader';
 
+/* Section label — quiet, not a heading */
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <h3
+    <p
       ref={ref}
-      className={cn('text-sm font-medium text-muted-foreground tracking-wide', className)}
+      className={cn('text-xs font-medium text-[#6B6B6B] tracking-wide', className)}
       {...props}
     />
   )
@@ -49,7 +48,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-xs text-muted-foreground mt-0.5', className)} {...props} />
+  <p ref={ref} className={cn('text-xs text-[#6B6B6B] mt-0.5', className)} {...props} />
 ));
 CardDescription.displayName = 'CardDescription';
 
@@ -64,16 +63,11 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center px-5 pb-5 pt-0 border-t border-border mt-4', className)}
+      className={cn('flex items-center px-5 pb-4 pt-0 border-t border-[#E8E8E5]', className)}
       {...props}
     />
   )
 );
 CardFooter.displayName = 'CardFooter';
 
-/* Divider inside a card */
-const CardDivider = ({ className }: { className?: string }) => (
-  <div className={cn('border-t border-border mx-5', className)} />
-);
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, CardDivider };
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };

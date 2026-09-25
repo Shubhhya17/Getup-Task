@@ -6,99 +6,96 @@
 
 /*
  * ═══════════════════════════════════════════════════════════════
- *  SLATE OPERATIONS — Design Token System
+ *  MERIDIAN — Design Token System
  *  Built for: B2B Support Ticketing Portal
- *  Principle: Status and priority are work signals, not decoration.
- *             Density serves agents; clarity serves everyone.
+ *
+ *  Principle: A white base means every color signal is intentional.
+ *  Status and priority carry full saturation because everything
+ *  else is quiet. The accent (#2563EB) appears once per screen.
+ *
+ *  Palette (6 named values):
+ *    #FFFFFF  base background
+ *    #FAFAF9  panel / card surface
+ *    #F4F4F2  input fill / secondary surface
+ *    #E8E8E5  hairline borders, dividers
+ *    #6B6B6B  secondary ink
+ *    #1A1A1A  primary ink
+ *    #2563EB  ONE accent — actions, active nav (used sparingly)
+ *
+ *  Status semantics (boldest color moment on the page):
+ *    Open        →  #16A34A  green  (alive, in queue)
+ *    In Progress →  #D97706  amber  (work happening)
+ *    Resolved    →  #2563EB  blue   (done, positive)
+ *    Closed      →  #9CA3AF  gray   (archived)
+ *
+ *  Priority semantics (unmistakable at a glance):
+ *    Low         →  #16A34A  green
+ *    Medium      →  #D97706  amber
+ *    High        →  #EA580C  orange
+ *    Critical    →  #DC2626  red
+ *
+ *  Indicators — approach (b):
+ *    Status: colored dot (●) + text label
+ *    Priority: filled square pip (■) + text label
+ *    Icons used ONLY for navigation meaning (back, search, attach,
+ *    logout) — never as decoration.
  * ═══════════════════════════════════════════════════════════════
- *
- *  Palette (6 named hex values):
- *    #0D1117  base background
- *    #161B22  card surface
- *    #21262D  elevated / input fill
- *    #30363D  border / divider
- *    #8B949E  secondary ink
- *    #1F6FEB  action blue
- *
- *  Status semantics:
- *    Open       → #3FB950  green   (alive, needs attention)
- *    In Progress → #E3B341  amber   (work in progress, caution)
- *    Resolved    → #58A6FF  blue    (calm, done, review)
- *    Closed      → #484F58  slate   (archived, inactive)
- *
- *  Priority semantics:
- *    Low      → green   (can wait)
- *    Medium   → amber   (scheduled)
- *    High     → orange  (urgent)
- *    Critical → red     (drop everything)
  */
 
 @layer base {
   :root {
     /* ── Surfaces ── */
-    --background:          220 14% 6%;   /* #0D1117 */
-    --surface-1:           215 14% 10%;  /* #161B22 */
-    --surface-2:           215 12% 14%;  /* #21262D */
-    --surface-3:           215 10% 19%;  /* #30363D */
-
-    /* ── Semantic aliases for shadcn compatibility ── */
-    --card:                215 14% 10%;
-    --card-foreground:     213 20% 90%;
-    --popover:             215 14% 10%;
-    --popover-foreground:  213 20% 90%;
-    --muted:               215 12% 14%;
-    --muted-foreground:    217 11% 56%;  /* #8B949E */
-    --secondary:           215 12% 14%;
-    --secondary-foreground: 213 20% 90%;
-    --border:              215 10% 19%;
-    --input:               215 12% 14%;
+    --background:    0 0% 100%;       /* #FFFFFF */
+    --surface-1:     60 5% 98%;       /* #FAFAF9 */
+    --surface-2:     60 3% 95%;       /* #F4F4F2 */
+    --border:        60 3% 91%;       /* #E8E8E5 */
 
     /* ── Ink ── */
-    --foreground:          213 20% 90%;  /* #E6EDF3 */
-    --ink-secondary:       217 11% 56%;  /* #8B949E */
-    --ink-tertiary:        216 9% 32%;   /* #484F58 */
+    --foreground:    0 0% 10%;        /* #1A1A1A */
+    --ink-secondary: 0 0% 42%;        /* #6B6B6B */
+    --ink-tertiary:  0 0% 63%;        /* #A1A1A1 */
 
-    /* ── Action ── */
-    --primary:             213 91% 52%;  /* #1F6FEB */
-    --primary-foreground:  213 20% 97%;
-    --accent:              213 91% 52%;
-    --accent-foreground:   213 20% 97%;
-    --destructive:         3 87% 63%;    /* #F85149 */
-    --destructive-foreground: 213 20% 97%;
-    --ring:                213 91% 52%;
+    /* ── Shadcn aliases ── */
+    --card:                60 5% 98%;
+    --card-foreground:     0 0% 10%;
+    --popover:             0 0% 100%;
+    --popover-foreground:  0 0% 10%;
+    --muted:               60 3% 95%;
+    --muted-foreground:    0 0% 42%;
+    --secondary:           60 3% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --input:               60 3% 95%;
+    --ring:                221 83% 53%;
 
-    /* ── Status — semantically assigned, never decorative ── */
-    --status-open:         134 61% 59%;  /* #3FB950 green  */
-    --status-progress:     43 79% 57%;   /* #E3B341 amber  */
-    --status-resolved:     212 100% 67%; /* #58A6FF blue   */
-    --status-closed:       218 9% 32%;   /* #484F58 slate  */
+    /* ── ONE accent ── */
+    --primary:             221 83% 53%;  /* #2563EB */
+    --primary-foreground:  0 0% 100%;
+    --accent:              221 83% 53%;
+    --accent-foreground:   0 0% 100%;
+    --destructive:         0 72% 51%;    /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
 
-    /* ── Priority — urgency gradient ── */
-    --priority-low:        134 61% 59%;  /* #3FB950 */
-    --priority-medium:     43 79% 57%;   /* #E3B341 */
-    --priority-high:       27 87% 57%;   /* #F0883E */
-    --priority-critical:   3 87% 63%;    /* #F85149 */
+    /* ── Status — full saturation, the loudest colors on the page ── */
+    --status-open:     142 76% 37%;   /* #16A34A */
+    --status-progress: 37 90% 44%;    /* #D97706 */
+    --status-resolved: 221 83% 53%;   /* #2563EB = same as accent */
+    --status-closed:   220 9% 63%;    /* #9CA3AF */
 
-    /* ── AI Suggestion surface — visually distinct "unconfirmed" zone ── */
-    --ai-surface:          245 35% 11%;
-    --ai-border:           245 40% 35%;
-    --ai-ink:              245 60% 75%;
+    /* ── Priority — unmistakable urgency gradient ── */
+    --priority-low:      142 76% 37%;  /* #16A34A */
+    --priority-medium:   37 90% 44%;   /* #D97706 */
+    --priority-high:     21 90% 48%;   /* #EA580C */
+    --priority-critical: 0 72% 51%;    /* #DC2626 */
+
+    /* ── AI suggestion — distinct unconfirmed zone ── */
+    --ai-surface:    221 100% 97%;   /* very pale blue-white */
+    --ai-border:     221 83% 70%;    /* medium blue */
+    --ai-ink:        221 83% 40%;    /* dark blue */
 
     /* ── Geometry ── */
-    --radius: 0.5rem;
-    --radius-sm: 0.25rem;
-    --radius-lg: 0.75rem;
-
-    /* ── Spacing scale (4px base) ── */
-    --sp-1: 0.25rem;
-    --sp-2: 0.5rem;
-    --sp-3: 0.75rem;
-    --sp-4: 1rem;
-    --sp-5: 1.25rem;
-    --sp-6: 1.5rem;
-    --sp-8: 2rem;
-    --sp-10: 2.5rem;
-    --sp-12: 3rem;
+    --radius:    0.375rem;   /* 6px — tighter than default */
+    --radius-sm: 0.25rem;    /* 4px */
+    --radius-lg: 0.5rem;     /* 8px */
   }
 }
 
@@ -116,302 +113,348 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: #FFFFFF;
+    color: #1A1A1A;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  /* Headings — tight, tool-like (not marketing) */
-  h1 { @apply text-xl font-semibold tracking-tight leading-tight; }
-  h2 { @apply text-lg font-semibold tracking-tight leading-tight; }
-  h3 { @apply text-base font-medium tracking-tight; }
-  h4, h5, h6 { @apply text-sm font-medium; }
+  /* Type scale — weight and size carry ALL hierarchy */
+  h1 {
+    font-size: 1.0625rem;   /* 17px */
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    color: #1A1A1A;
+  }
+  h2 {
+    font-size: 0.9375rem;   /* 15px */
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  h3 {
+    font-size: 0.8125rem;   /* 13px */
+    font-weight: 500;
+  }
 
-  /* Data & numeric — mono for scannability */
+  /* JetBrains Mono — data, numerics, monospaced */
   .font-mono {
     font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
   }
 
-  /* Scrollbar */
+  /* Scrollbar — hairline, white bg */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
+    background: #E8E8E5;
     border-radius: 2px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.4);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: #D1D1CE; }
 
-  /* Focus ring — visible, professional */
+  /* Focus — visible, uses the accent */
   :focus-visible {
-    outline: 2px solid hsl(var(--ring));
+    outline: 2px solid #2563EB;
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
 
   /* Selection */
   ::selection {
-    background: hsl(var(--primary) / 0.25);
-    color: hsl(var(--foreground));
+    background: rgba(37, 99, 235, 0.12);
+    color: #1A1A1A;
   }
 }
 
-/* ─── Component utilities ─────────────────────────────────────── */
+/* ─── Status indicators — dot + label ─────────────────────────── */
+/*
+ * Approach (b): colored dot (●) + text. No icon library glyph.
+ * These are the ONLY full-saturation colors on the page.
+ */
 @layer utilities {
 
-  /* ── Status badges — color + text always, never color alone ── */
-  .badge-status-open {
-    background: hsl(var(--status-open) / 0.12);
-    color: hsl(var(--status-open));
-    border: 1px solid hsl(var(--status-open) / 0.3);
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.6875rem;   /* 11px */
     font-weight: 500;
-    letter-spacing: 0.01em;
+    white-space: nowrap;
   }
-  .badge-status-progress {
-    background: hsl(var(--status-progress) / 0.12);
-    color: hsl(var(--status-progress));
-    border: 1px solid hsl(var(--status-progress) / 0.3);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-  }
-  .badge-status-resolved {
-    background: hsl(var(--status-resolved) / 0.12);
-    color: hsl(var(--status-resolved));
-    border: 1px solid hsl(var(--status-resolved) / 0.3);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-  }
-  .badge-status-closed {
-    background: hsl(var(--status-closed) / 0.15);
-    color: hsl(var(--ink-secondary));
-    border: 1px solid hsl(var(--status-closed) / 0.3);
-    font-weight: 500;
-    letter-spacing: 0.01em;
+  .status-dot::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
-  /* ── Priority badges — urgency gradient, WCAG AA ── */
-  .badge-low {
-    background: hsl(var(--priority-low) / 0.1);
-    color: hsl(var(--priority-low));
-    border: 1px solid hsl(var(--priority-low) / 0.25);
-    font-weight: 500;
+  .status-open {
+    color: #15803D;           /* slightly darker for contrast on white */
   }
-  .badge-medium {
-    background: hsl(var(--priority-medium) / 0.1);
-    color: hsl(var(--priority-medium));
-    border: 1px solid hsl(var(--priority-medium) / 0.25);
-    font-weight: 500;
-  }
-  .badge-high {
-    background: hsl(var(--priority-high) / 0.1);
-    color: hsl(var(--priority-high));
-    border: 1px solid hsl(var(--priority-high) / 0.25);
-    font-weight: 500;
-  }
-  .badge-critical {
-    background: hsl(var(--priority-critical) / 0.1);
-    color: hsl(var(--priority-critical));
-    border: 1px solid hsl(var(--priority-critical) / 0.25);
-    font-weight: 500;
+  .status-open::before {
+    background: #16A34A;
   }
 
-  /* ── Priority left-bar — ticket list density indicator ── */
-  .priority-bar-low     { border-left: 3px solid hsl(var(--priority-low)); }
-  .priority-bar-medium  { border-left: 3px solid hsl(var(--priority-medium)); }
-  .priority-bar-high    { border-left: 3px solid hsl(var(--priority-high)); }
-  .priority-bar-critical {
-    border-left: 3px solid hsl(var(--priority-critical));
-    box-shadow: inset 3px 0 6px hsl(var(--priority-critical) / 0.15);
+  .status-progress {
+    color: #B45309;
+  }
+  .status-progress::before {
+    background: #D97706;
   }
 
-  /* ── AI Suggestion panel — dashed border, clearly "unconfirmed" ── */
+  .status-resolved {
+    color: #1D4ED8;
+  }
+  .status-resolved::before {
+    background: #2563EB;
+  }
+
+  .status-closed {
+    color: #6B7280;
+  }
+  .status-closed::before {
+    background: #9CA3AF;
+  }
+
+  /* ── Priority pip — filled square ■ + label ── */
+  .priority-pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .priority-pip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;    /* square, not circle — different shape from status */
+    flex-shrink: 0;
+  }
+
+  .priority-low {
+    color: #15803D;
+  }
+  .priority-low::before { background: #16A34A; }
+
+  .priority-medium {
+    color: #B45309;
+  }
+  .priority-medium::before { background: #D97706; }
+
+  .priority-high {
+    color: #C2410C;
+  }
+  .priority-high::before { background: #EA580C; }
+
+  .priority-critical {
+    color: #B91C1C;
+    font-weight: 600;
+  }
+  .priority-critical::before { background: #DC2626; }
+
+  /* ── Priority left-bar — ticket row urgency indicator ── */
+  .priority-bar-low      { border-left: 2px solid #16A34A; }
+  .priority-bar-medium   { border-left: 2px solid #D97706; }
+  .priority-bar-high     { border-left: 2px solid #EA580C; }
+  .priority-bar-critical { border-left: 2px solid #DC2626; }
+
+  /* ── Badge containers — used for tags, not primary status ── */
+  /* Status uses the dot+label above; these are for compact list use */
+  .badge-status-open     { color: #15803D; background: #F0FDF4; border: 1px solid #BBF7D0; }
+  .badge-status-progress { color: #B45309; background: #FFFBEB; border: 1px solid #FDE68A; }
+  .badge-status-resolved { color: #1D4ED8; background: #EFF6FF; border: 1px solid #BFDBFE; }
+  .badge-status-closed   { color: #6B7280; background: #F9FAFB; border: 1px solid #E5E7EB; }
+
+  .badge-low      { color: #15803D; background: #F0FDF4; border: 1px solid #BBF7D0; }
+  .badge-medium   { color: #B45309; background: #FFFBEB; border: 1px solid #FDE68A; }
+  .badge-high     { color: #C2410C; background: #FFF7ED; border: 1px solid #FDBA74; }
+  .badge-critical { color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; font-weight: 600; }
+
+  /* ── Panel surfaces — hairline border + tint, no shadow ── */
+  .panel {
+    background: #FAFAF9;
+    border: 1px solid #E8E8E5;
+    border-radius: var(--radius);
+  }
+  .panel-white {
+    background: #FFFFFF;
+    border: 1px solid #E8E8E5;
+    border-radius: var(--radius);
+  }
+  .panel-inset {
+    background: #F4F4F2;
+    border: 1px solid #E8E8E5;
+    border-radius: var(--radius);
+  }
+
+  /* ── AI suggestion — dashed blue border, pale blue surface ── */
   .ai-panel {
     background: hsl(var(--ai-surface));
     border: 1.5px dashed hsl(var(--ai-border));
     border-radius: var(--radius-lg);
     position: relative;
   }
-  .ai-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, hsl(245 60% 55% / 0.04) 0%, transparent 60%);
-    pointer-events: none;
-  }
 
-  /* ── Ticket row — table-density design, not bulky cards ── */
-  .ticket-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    background: hsl(var(--surface-1));
-    border-bottom: 1px solid hsl(var(--border));
-    transition: background 120ms ease;
-  }
-  .ticket-row:hover {
-    background: hsl(var(--surface-2));
-  }
-  .ticket-row:first-child {
-    border-top-left-radius: var(--radius);
-    border-top-right-radius: var(--radius);
-  }
-  .ticket-row:last-child {
-    border-bottom: none;
-    border-bottom-left-radius: var(--radius);
-    border-bottom-right-radius: var(--radius);
-  }
-
-  /* ── Surface hierarchy ── */
-  .surface-0 { background: hsl(var(--background)); }
-  .surface-1 { background: hsl(var(--surface-1)); }
-  .surface-2 { background: hsl(var(--surface-2)); }
-
-  /* ── Panel — bordered content block ── */
-  .panel {
-    background: hsl(var(--surface-1));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
-  }
-  .panel-elevated {
-    background: hsl(var(--surface-2));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
-  }
-
-  /* ── Internal note surface ── */
+  /* ── Internal note — amber tint ── */
   .note-internal {
-    background: hsl(43 79% 57% / 0.07);
-    border: 1px solid hsl(43 79% 57% / 0.2);
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
     border-radius: var(--radius);
   }
 
-  /* ── Sidebar nav active ── */
+  /* ── Nav active state ── */
   .nav-active {
-    background: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary));
-    border-right: 2px solid hsl(var(--primary));
+    color: #2563EB;
+    background: #EFF6FF;
+    border-right: 2px solid #2563EB;
+    font-weight: 500;
   }
 
-  /* ── Data display — mono numbers ── */
+  /* ── Data display — JetBrains Mono numerals ── */
   .stat-value {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-feature-settings: "tnum" 1;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  /* ── Ticket row — table-density list ── */
+  .ticket-row {
+    border-bottom: 1px solid #E8E8E5;
+    background: #FFFFFF;
+    transition: background 80ms ease;
+  }
+  .ticket-row:hover {
+    background: #FAFAF9;
+  }
+  .ticket-row:last-child { border-bottom: none; }
+
+  /* ── Auth page — subtle grid ── */
+  .auth-bg {
+    background: #FFFFFF;
+    background-image:
+      linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
 
   /* ── Scrollbar thin ── */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) transparent;
-  }
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #E8E8E5 transparent; }
   .scrollbar-thin::-webkit-scrollbar { width: 5px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 2px;
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #E8E8E5; border-radius: 2px; }
+
+  /* ── Activity timeline ── */
+  .activity-timeline { position: relative; padding-left: 1.25rem; }
+  .activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background: #E8E8E5;
+  }
+  .activity-dot {
+    position: absolute;
+    left: 0;
+    top: 0.3rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #E8E8E5;
+    border: 1.5px solid #2563EB;
   }
 
-  /* ── Auth page background — architectural, not decorative ── */
-  .auth-bg {
-    background: hsl(var(--background));
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
-    background-size: 32px 32px;
+  /* ── Ticket description prose ── */
+  .ticket-description {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: #6B6B6B;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
-  /* ── KPI card counter — the ONE animated moment ── */
-  .kpi-reveal {
-    animation: kpi-count-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .kpi-reveal:nth-child(1) { animation-delay: 0.05s; }
-  .kpi-reveal:nth-child(2) { animation-delay: 0.12s; }
-  .kpi-reveal:nth-child(3) { animation-delay: 0.19s; }
-  .kpi-reveal:nth-child(4) { animation-delay: 0.26s; }
-
-  /* ── Status badge transition — state-change animation ── */
+  /* ── Badge transition ── */
   .badge-transition {
-    transition: background 300ms ease, color 300ms ease, border-color 300ms ease;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
   }
+}
 
-  /* ── Comment appear — when posted ── */
-  .comment-appear {
-    animation: comment-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
+/* ─── THE ONE animation moment: dashboard KPI reveal ──────────── */
+.kpi-reveal {
+  animation: kpi-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.kpi-reveal:nth-child(1) { animation-delay: 0.04s; }
+.kpi-reveal:nth-child(2) { animation-delay: 0.10s; }
+.kpi-reveal:nth-child(3) { animation-delay: 0.16s; }
+.kpi-reveal:nth-child(4) { animation-delay: 0.22s; }
 
-  /* ── AI accepted confirmation flash ── */
-  .ai-accepted {
-    animation: accept-flash 400ms ease both;
-  }
-
-  /* ── Critical ticket pulse — only for Critical + Open ── */
-  .critical-pulse {
-    animation: critical-tick 2.5s ease infinite;
-  }
+/* State-change animations */
+.comment-appear {
+  animation: comment-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.ai-accepted {
+  animation: accept-pulse 350ms ease both;
+}
+.critical-pulse {
+  animation: critical-tick 3s ease infinite;
 }
 
 /* ─── Keyframes ────────────────────────────────────────────────── */
-@keyframes kpi-count-in {
-  from { opacity: 0; transform: translateY(6px); }
+@keyframes kpi-in {
+  from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes comment-in {
-  from { opacity: 0; transform: translateX(-6px); }
+  from { opacity: 0; transform: translateX(-4px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-
-@keyframes accept-flash {
+@keyframes accept-pulse {
   0%   { background: hsl(var(--ai-surface)); }
-  40%  { background: hsl(var(--primary) / 0.12); }
+  45%  { background: rgba(37, 99, 235, 0.08); }
   100% { background: hsl(var(--ai-surface)); }
 }
-
 @keyframes critical-tick {
-  0%, 100% { border-left-color: hsl(var(--priority-critical)); }
-  50%       { border-left-color: hsl(var(--priority-critical) / 0.4); }
+  0%, 100% { border-left-color: #DC2626; }
+  50%       { border-left-color: rgba(220, 38, 38, 0.35); }
 }
-
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes shimmer {
-  from { background-position: -200px 0; }
-  to   { background-position: calc(200px + 100%) 0; }
+  from { background-position: -300px 0; }
+  to   { background-position: calc(300px + 100%) 0; }
 }
 
-/* ─── Reduced motion — all animations off ─────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  .critical-pulse { animation: none !important; }
-}
+.animate-slide-down { animation: slide-down 130ms ease both; }
 
-/* ─── Shimmer loading skeleton ────────────────────────────────── */
+/* ─── Shimmer skeleton ─────────────────────────────────────────── */
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--surface-2)) 0px,
-    hsl(var(--surface-3) / 0.6) 40px,
-    hsl(var(--surface-2)) 80px
-  );
+  background: linear-gradient(90deg, #F4F4F2 0, #EBEBEB 40px, #F4F4F2 80px);
   background-size: 300px 100%;
-  animation: shimmer 1.6s ease infinite;
+  animation: shimmer 1.5s ease infinite;
 }
 
-/* ─── Recharts tooltip override ───────────────────────────────── */
+/* ─── Recharts tooltip ─────────────────────────────────────────── */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background: hsl(var(--surface-2)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  border-radius: var(--radius) !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E8E8E5 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
   font-size: 11px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  color: #1A1A1A !important;
 }
 
-/* ─── Select element — matches design system ──────────────────── */
+/* ─── Select element ───────────────────────────────────────────── */
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B949E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   -webkit-appearance: none;
@@ -420,36 +463,12 @@ select {
   padding-right: 2rem !important;
 }
 
-/* ─── Prose-like descriptions ─────────────────────────────────── */
-.ticket-description {
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: hsl(var(--ink-secondary));
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* ─── Activity log timeline line ──────────────────────────────── */
-.activity-timeline {
-  position: relative;
-  padding-left: 1.5rem;
-}
-.activity-timeline::before {
-  content: '';
-  position: absolute;
-  left: 0.4rem;
-  top: 0.5rem;
-  bottom: 0.5rem;
-  width: 1px;
-  background: hsl(var(--border));
-}
-.activity-dot {
-  position: absolute;
-  left: 0;
-  top: 0.35rem;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: hsl(var(--surface-3));
-  border: 2px solid hsl(var(--primary) / 0.5);
+/* ─── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .critical-pulse { animation: none !important; }
 }
