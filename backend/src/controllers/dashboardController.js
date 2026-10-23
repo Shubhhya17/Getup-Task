@@ -1,5 +1,4 @@
 const Ticket = require('../models/Ticket');
-const { generateQueueSummary } = require('../services/aiService');
 
 /**
  * GET /api/dashboard/stats
@@ -100,26 +99,21 @@ exports.getDashboardStats = async (req, res) => {
     ]),
   ]);
 
-  const statsData = {
-    byStatus,
-    byPriority,
-    resolutionTime: resolutionTime[0] || {
-      avgResolutionHours: null,
-      minResolutionHours: null,
-      maxResolutionHours: null,
-      resolvedTicketCount: 0,
-    },
-    stalledTickets: {
-      count: stalledTickets.length,
-      tickets: stalledTickets,
-    },
-  };
-
-  const { summary: aiSummary } = await generateQueueSummary(statsData);
-  statsData.aiSummary = aiSummary;
-
   res.json({
     success: true,
-    data: statsData,
+    data: {
+      byStatus,
+      byPriority,
+      resolutionTime: resolutionTime[0] || {
+        avgResolutionHours: null,
+        minResolutionHours: null,
+        maxResolutionHours: null,
+        resolvedTicketCount: 0,
+      },
+      stalledTickets: {
+        count: stalledTickets.length,
+        tickets: stalledTickets,
+      },
+    },
   });
 };

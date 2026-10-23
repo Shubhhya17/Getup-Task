@@ -41,10 +41,8 @@ export default function TicketDetailPage() {
   const [commentBody, setCommentBody]           = useState('');
   const [isInternal, setIsInternal]             = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [isRegeneratingAi, setIsRegeneratingAi]       = useState(false);
   const [activeTab, setActiveTab]               = useState<'conversation' | 'activity'>('conversation');
   const [aiAccepted, setAiAccepted]             = useState<string | null>(null);
-  const [replyTone, setReplyTone]               = useState('professional');
 
   const canChangeStatus  = user?.role === 'agent' || user?.role === 'admin';
   const canAssign        = user?.role === 'admin';
@@ -124,23 +122,6 @@ export default function TicketDetailPage() {
       loadTicket();
     } catch (err) {
       toast({ title: 'Error', description: getErrorMessage(err), variant: 'destructive' });
-    }
-  };
-
-  const handleRegenerateReply = async () => {
-    setIsRegeneratingAi(true);
-    try {
-      const res = await ticketApi.generateAiReply(id, replyTone);
-      const newReply = res.data.data.draftReply;
-      setTicket(prev => prev ? { 
-        ...prev, 
-        aiSuggestion: { ...prev.aiSuggestion!, draftReply: newReply } 
-      } : null);
-      toast({ title: 'AI reply regenerated' });
-    } catch (err) {
-      toast({ title: 'Error regenerating reply', description: getErrorMessage(err), variant: 'destructive' });
-    } finally {
-      setIsRegeneratingAi(false);
     }
   };
 
@@ -265,16 +246,6 @@ export default function TicketDetailPage() {
                 >
                   Not applied
                 </span>
-                {ticket.aiSuggestion.sentiment && (
-                  <span className={cn(
-                    "text-xs px-2 py-0.5 rounded font-medium border",
-                    ticket.aiSuggestion.sentiment === 'Frustrated' ? 'bg-[#FEF2F2] text-[#B91C1C] border-[#FECACA]' : 
-                    ticket.aiSuggestion.sentiment === 'Positive' ? 'bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]' :
-                    'bg-[#F3F4F6] text-[#374151] border-[#E5E7EB]'
-                  )}>
-                    {ticket.aiSuggestion.sentiment}
-                  </span>
-                )}
                 {ticket.aiSuggestion.fallback && (
                   <span className="text-xs px-2 py-0.5 rounded font-medium bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">
                     Heuristic
@@ -319,58 +290,21 @@ export default function TicketDetailPage() {
 
               {/* Draft reply */}
               {ticket.aiSuggestion.draftReply && (
-                <div className="p-3 rounded bg-white border border-[#E8E8E5] mb-3">
-                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <div className="p-3 rounded bg-white border border-[#E8E8E5]">
+                  <div className="flex items-center justify-between mb-2">
                     <p className="text-xs text-[#6B6B6B]">Draft reply</p>
-                    <div className="flex items-center gap-2">
-                      <select 
-                        value={replyTone}
-                        onChange={(e) => setReplyTone(e.target.value)}
-                        className="h-7 text-xs rounded border border-[#E8E8E5] bg-white px-2 focus:outline-none focus:border-[#2563EB]"
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="concise">Concise</option>
-                        <option value="empathetic">Empathetic</option>
-                      </select>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleRegenerateReply}
-                        disabled={isRegeneratingAi}
-                        className="h-7 text-xs"
-                      >
-                        {isRegeneratingAi ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Regenerate'}
-                      </Button>
-                      <Button
-                        variant="ai-accept"
-                        size="sm"
-                        onClick={useAiDraft}
-                        aria-label="Use AI draft reply as your comment"
-                        className="h-7 text-xs"
-                      >
-                        Use as draft
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ai-accept"
+                      size="sm"
+                      onClick={useAiDraft}
+                      aria-label="Use AI draft reply as your comment"
+                    >
+                      Use as draft
+                    </Button>
                   </div>
                   <p className="text-xs text-[#6B6B6B] leading-relaxed line-clamp-4 whitespace-pre-wrap">
                     {ticket.aiSuggestion.draftReply}
                   </p>
-                </div>
-              )}
-
-              {/* Similar Tickets */}
-              {ticket.aiSuggestion.similarTickets && ticket.aiSuggestion.similarTickets.length > 0 && (
-                <div className="p-3 rounded bg-white border border-[#E8E8E5]">
-                  <p className="text-xs text-[#6B6B6B] mb-2">Possibly related tickets</p>
-                  <ul className="space-y-1">
-                    {ticket.aiSuggestion.similarTickets.map(t => (
-                      <li key={t.ticketId}>
-                        <Link href={`/dashboard/tickets/${t.ticketId}`} className="text-xs text-[#2563EB] hover:underline truncate block">
-                          {t.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               )}
             </div>

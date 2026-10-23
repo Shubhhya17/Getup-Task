@@ -120,7 +120,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── KPI row — THE ONE animated moment ───────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#E8E8E5] rounded overflow-hidden mb-4 border border-[#E8E8E5]" role="list" aria-label="Key metrics">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#E8E8E5] rounded overflow-hidden mb-8 border border-[#E8E8E5]" role="list" aria-label="Key metrics">
         <KpiCard title="Total tickets"  value={totalTickets}  index={0} />
         <KpiCard title="Open"           value={openCount}     index={1} valueColor="#15803D" />
         <KpiCard title="Resolved"       value={resolvedCount} index={2} valueColor="#1D4ED8" />
@@ -131,19 +131,6 @@ export default function DashboardPage() {
           valueColor={stalledCount > 0 ? '#C2410C' : '#A1A1A1'}
         />
       </div>
-
-      {stats?.aiSummary && (
-        <div className="ai-panel p-4 mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold text-[hsl(var(--ai-ink))]">
-              AI Queue Summary
-            </span>
-          </div>
-          <p className="text-sm text-[#1A1A1A] leading-relaxed">
-            {stats.aiSummary}
-          </p>
-        </div>
-      )}
 
       {/* ── Resolution time + status donut ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
